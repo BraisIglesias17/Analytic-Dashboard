@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Analysis Pipeline</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,500;0,9..40,700;1,9..40,300&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+
+<div class="app">
+  <!-- ── Sidebar ───────────────────────────────────────────────────────── -->
+  <aside class="sidebar">
+    <div>
+      <div class="logo">Data<span>Flow</span></div>
+      <div class="tagline">CSV / Excel analysis pipeline</div>
+    </div>
+
+    <!-- File upload -->
+    <div>
+      <div class="section-label">01 — Select Files</div>
+      <div class="drop-zone" id="dropZone">
+        <input type="file" id="fileInput" multiple accept=".csv,.tsv,.txt,.xlsx,.xls">
+        <div class="drop-icon">📂</div>
+        <p><strong>Drop files here</strong><br>or click to browse<br><span style="font-size:.72rem;opacity:.5">CSV · TSV · TXT · XLSX</span></p>
+      </div>
+      <div class="file-list" id="fileList" style="margin-top:.6rem;"></div>
+    </div>
+
+    <!-- Parameters -->
+    <div>
+      <div class="section-label">02 — Parameters</div>
+      <div class="params">
+
+        <div class="param-row">
+          <label>Delimiter</label>
+          <select id="pDelimiter">
+            <option value="auto">Auto detect</option>
+            <option value=",">,  Comma</option>
+            <option value=";">; Semicolon</option>
+            <option value="&#9;">⇥  Tab</option>
+            <option value="|">|  Pipe</option>
+            <option value=" "> Space</option>
+          </select>
+        </div>
+
+        <div class="param-row">
+          <label>Encoding</label>
+          <select id="pEncoding">
+            <option value="utf-8">UTF-8</option>
+            <option value="latin-1">Latin-1</option>
+            <option value="cp1252">CP-1252</option>
+          </select>
+        </div>
+
+        <div class="param-row">
+          <label>Decimal separator</label>
+          <select id="pDecimal">
+            <option value=".">. (dot)</option>
+            <option value=",">, (comma)</option>
+          </select>
+        </div>
+
+        <div class="param-row">
+          <label>Skip rows (header offset)</label>
+          <input type="text" id="pSkipRows" value="0" placeholder="0">
+        </div>
+
+        <div class="param-row">
+          <label>Thousands separator (optional)</label>
+          <input type="text" id="pThousands" placeholder="leave blank for none">
+        </div>
+
+        <div class="toggle-row">
+          <label>Drop duplicates</label>
+          <label class="toggle"><input type="checkbox" id="pDropDup" checked><span class="toggle-slider"></span></label>
+        </div>
+
+        <div class="toggle-row">
+          <label>Drop rows with NA</label>
+          <label class="toggle"><input type="checkbox" id="pDropNa"><span class="toggle-slider"></span></label>
+        </div>
+
+        <div class="toggle-row">
+          <label>Fill NA with value</label>
+          <label class="toggle"><input type="checkbox" id="pFillNa"><span class="toggle-slider"></span></label>
+        </div>
+
+        <div class="param-row" id="fillValRow" style="display:none">
+          <label>Fill value</label>
+          <input type="text" id="pFillVal" value="0" placeholder="0">
+        </div>
+
+        <div class="toggle-row">
+          <label>Normalise numeric cols (0–1)</label>
+          <label class="toggle"><input type="checkbox" id="pNormalize"><span class="toggle-slider"></span></label>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Progress -->
+    <div class="progress-wrap" id="progressWrap">
+      <div class="section-label">Pipeline progress</div>
+      <div class="progress-bar-bg"><div class="progress-bar-fg" id="progressBar"></div></div>
+      <div class="progress-label"><span id="progressStatus">Initialising…</span><span id="progressPct">0%</span></div>
+    </div>
+
+    <!-- Run button -->
+    <button class="btn btn-primary" id="runBtn" disabled>▶  Run Pipeline</button>
+
+    <!-- Log -->
+    <div>
+      <div class="section-label" style="display:flex;justify-content:space-between">
+        Log
+        <span style="cursor:pointer;font-size:.7rem" onclick="clearLog()">clear</span>
+      </div>
+      <div class="log-box" id="logBox"></div>
+    </div>
+  </aside>
+
+  <!-- ── Main ──────────────────────────────────────────────────────────── -->
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <div style="font-size:.72rem;color:var(--muted);font-family:var(--mono)">STATUS</div>
+        <div id="statusBadge" style="font-family:var(--mono);font-size:.82rem;color:var(--muted)">idle</div>
+      </div>
+      <div class="topbar-right">
+        <button class="btn btn-sm" id="exportBtn" style="display:none" onclick="exportResults()">⬇ Export JSON</button>
+        <button class="btn btn-danger-sm" id="clearBtn" style="display:none" onclick="clearResults()">✕ Clear</button>
+      </div>
+    </div>
+
+    <div class="tabs" id="tabs" style="display:none">
+      <button class="tab active" data-tab="charts">📊 Dashboard</button>
+      <button class="tab" data-tab="tables">📋 Statistics</button>
+    </div>
+
+    <div class="content" id="content">
+      <div class="empty-state" id="emptyState">
+        <div class="big-icon">⚡</div>
+        <h2>Ready to analyse</h2>
+        <p>Upload one or more CSV / Excel files, tune the parameters in the sidebar, then hit <strong>Run Pipeline</strong>.</p>
+      </div>
+
+      <div class="tab-panel active" id="tab-charts" style="display:none">
+        <div class="charts-grid" id="chartsGrid"></div>
+      </div>
+
+      <div class="tab-panel" id="tab-tables" style="display:none">
+        <div id="tablesContainer"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+ <script src="{{ url_for('static', filename='handler.js') }}"></script> 
+</body>
+</html>

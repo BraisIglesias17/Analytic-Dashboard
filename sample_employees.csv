@@ -1,0 +1,21 @@
+name,age,salary,department,score,city
+Alice,29,72000,Engineering,88.5,New York
+Bob,34,85000,Marketing,76.2,San Francisco
+Carol,27,61000,Engineering,91.0,New York
+Dave,45,95000,Management,82.3,Chicago
+Eve,31,78000,Engineering,87.1,San Francisco
+Frank,28,65000,Marketing,70.5,Chicago
+Grace,38,88000,Management,84.7,New York
+Hank,25,55000,Engineering,93.2,Austin
+Irene,42,102000,Management,79.8,Chicago
+Jack,33,74000,Marketing,81.4,San Francisco
+Kate,29,69000,Engineering,89.6,Austin
+Liam,36,91000,Management,85.2,New York
+Mia,24,52000,Marketing,72.1,Austin
+Noah,31,76000,Engineering,90.3,San Francisco
+Olivia,27,63000,Marketing,74.8,Chicago
+,35,81000,Engineering,86.1,New York
+Quinn,40,97000,Management,,Chicago
+Ryan,28,67000,Engineering,88.9,Austin
+Sara,32,79000,Marketing,77.3,New York
+Tom,44,93000,Management,83.6,San Francisco
