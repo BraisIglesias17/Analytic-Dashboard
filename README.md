@@ -15,6 +15,8 @@ python app.py
 http://localhost:5050
 ```
 
+![Screenshot](./imgs/screenshot.png)
+
 ## Features
 
 ### File Support
