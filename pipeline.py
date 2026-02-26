@@ -93,8 +93,6 @@ class Pipeline():
                 except Exception as exc:
                     self.log(f'Column {col} can not be expressed as numerical, skipping ...')
 
-            print(df.select_dtypes(include=np.number).columns)
-
             # Normalise numeric cols (0-1) if requested
             if params.get("normalize"):
                 num_cols = df.select_dtypes(include=np.number).columns
@@ -190,7 +188,6 @@ class Pipeline():
 
             #── 5. Top categorical bar charts ────────────────────────────────
             for cat_col in cat_df.columns[:2]:
-                print("CATEGORICAL VALUEEEEES")
                 vc = df[cat_col].value_counts().head(15)
                 fig, ax = plt.subplots(figsize=(8, max(3, len(vc) * 0.45)))
                 fig.patch.set_facecolor("#0D0D14")
