@@ -60,7 +60,6 @@ dataflow/
 ├── app.py              ← Flask backend + pipeline logic
 ├── templates/
 │   └── index.html      ← Single-page frontend
-├── sample_employees.csv ← Example file to test with
 └── README.md
 ```
 
