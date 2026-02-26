@@ -86,15 +86,15 @@ def run_pipeline():
             pipeline.set_progress(95)
 
             with state_lock:
-                pipeline_state["results"] = charts
-                pipeline_state["dataframes"] = summaries
-                pipeline_state["status"] = "done"
-                pipeline_state["progress"] = 100
+                pipeline.pipeline_state["results"] = charts
+                pipeline.pipeline_state["dataframes"] = summaries
+                pipeline.pipeline_state["status"] = "done"
+                pipeline.pipeline_state["progress"] = 100
             pipeline.log("✅ Pipeline complete")
         except Exception as e:
             with state_lock:
-                pipeline_state["status"] = "error"
-                pipeline_state["error"] = str(e)
+                pipeline.pipeline_state["status"] = "error"
+                pipeline.pipeline_state["error"] = str(e)
             pipeline.log(f"✗ Error: {e}")
             pipeline.log(traceback.format_exc())
 
@@ -104,13 +104,15 @@ def run_pipeline():
 @app.route("/status")
 def status():
     with state_lock:
-        return jsonify({k: v for k, v in pipeline_state.items() if k != "results" and k != "dataframes"})
+       
+        return jsonify({k: v for k, v in pipeline.pipeline_state.items() if k != "results" and k != "dataframes"})
 
 @app.route("/results")
 def results():
     with state_lock:
-        return jsonify({"charts": pipeline_state["results"],
-                        "dataframes": pipeline_state["dataframes"]})
+        print(pipeline.pipeline_state["dataframes"])
+        return jsonify({"charts": pipeline.pipeline_state["results"],
+                        "dataframes": pipeline.pipeline_state["dataframes"]})
 
 @app.route("/upload", methods=["POST"])
 def upload():

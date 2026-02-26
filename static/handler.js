@@ -140,16 +140,22 @@ async function pollStatus() {
 }
 
 async function loadResults() {
-  const data = await (await fetch('/results')).json();
-  lastResults = data;
-  renderCharts(data.charts);
-  renderTables(data.dataframes);
-  document.getElementById('emptyState').style.display = 'none';
-  document.getElementById('tabs').style.display = 'flex';
-  document.getElementById('tab-charts').style.display = 'block';
-  document.getElementById('tab-tables').style.display = 'none';
-  document.getElementById('exportBtn').style.display = '';
-  document.getElementById('clearBtn').style.display = '';
+  try{
+      const data = await (await fetch('/results')).json()
+      
+      lastResults = data;
+      renderCharts(data.charts);
+      renderTables(data.dataframes);
+      document.getElementById('emptyState').style.display = 'none';
+      document.getElementById('tabs').style.display = 'flex';
+      document.getElementById('tab-charts').style.display = 'block';
+      document.getElementById('tab-tables').style.display = 'none';
+      document.getElementById('exportBtn').style.display = '';
+      document.getElementById('clearBtn').style.display = '';
+  }catch(s){
+    toast('✗ Error: ' + s.error, 'err');
+  }
+
 }
 
 // ── Render charts ─────────────────────────────────────────────────────────────

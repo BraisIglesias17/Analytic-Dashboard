@@ -83,11 +83,18 @@ class Pipeline():
         self.log("Transforming data…")
         transformed = {}
         for name, df in dfs.items():
+
             # Auto-cast object columns to numeric where possible
             for col in df.select_dtypes(include="object").columns:
-                converted = pd.to_numeric(df[col], errors="ignore")
-                if converted.dtype != object:
-                    df[col] = converted
+                try:
+                    converted = pd.to_numeric(df[col])
+                    if converted.dtype != object:
+                        df[col] = converted
+                except Exception as exc:
+                    self.log(f'Column {col} can not be expressed as numerical, skipping ...')
+
+            print(df.select_dtypes(include=np.number).columns)
+
             # Normalise numeric cols (0-1) if requested
             if params.get("normalize"):
                 num_cols = df.select_dtypes(include=np.number).columns
@@ -95,6 +102,7 @@ class Pipeline():
                     cmin, cmax = df[col].min(), df[col].max()
                     if cmax != cmin:
                         df[col] = (df[col] - cmin) / (cmax - cmin)
+
             transformed[name] = df
             self.log(f"  ✓ {name}: types inferred, {len(df.select_dtypes(include=np.number).columns)} numeric cols")
         return transformed
@@ -180,8 +188,9 @@ class Pipeline():
                 plt.tight_layout()
                 charts.append({"title": f"{name} — Box Plots", "img": fig_to_b64(fig)})
 
-            # ── 5. Top categorical bar charts ────────────────────────────────
+            #── 5. Top categorical bar charts ────────────────────────────────
             for cat_col in cat_df.columns[:2]:
+                print("CATEGORICAL VALUEEEEES")
                 vc = df[cat_col].value_counts().head(15)
                 fig, ax = plt.subplots(figsize=(8, max(3, len(vc) * 0.45)))
                 fig.patch.set_facecolor("#0D0D14")
@@ -205,6 +214,8 @@ class Pipeline():
         summaries = []
         for name, df in dfs.items():
             desc = df.describe(include="all").round(4).reset_index()
+            desc=desc.fillna("-")
+
             desc.rename(columns={"index": "stat"}, inplace=True)
             summaries.append({"name": name, "shape": list(df.shape),
                             "columns": list(df.columns),
